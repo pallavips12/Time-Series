@@ -1,0 +1,74 @@
+setwd("D:/Time series")
+library(forecast)
+library(TSA)
+library(tseries)
+
+#Moving average
+aes=read.csv("aes.csv",1)
+attach(aes)
+sales=ts(SalesGWh,frequency = 1,start=c(1989))
+plot(sales,col="Blue",main="Electricity sales in Aussie")
+MA=ma(SalesGWh,5)
+plot.ts(SalesGWh,col="orange",main="Elec sales in Aussie")
+lines(MA,col="purple")
+
+#centered MA
+beer=read.csv("beer.csv",1)
+attach(beer)
+beer=ts(beer,frequency=4)
+plot.ts(OzBeer,col="purple",main="Quaterly data")
+MA=ma(OzBeer,4,T)
+#centering is implemented by setting parameter to True(T) aor False(F)
+lines(MA,col="red")
+#seasonality has been filtered and the trend remains
+
+
+# Decomposing a time series
+beer=read.csv("beer.csv",1)
+attach(beer)
+ts_beer=ts(beer, frequency = 4)
+plot(ts_beer, col="orange",main="Beer series every quarter")
+p=periodogram(OzBeer)
+#lines are know as spectral lines
+#frequency denotes at what frequency it got peaks
+
+#the signal is strongest in the begining and then it is strongest at a frequency of 0.25
+#periodicity = 1/frequency
+dd=data.frame(freq=p$freq, spec=p$spec)
+order=dd[order(-dd$spec),]
+top2=head(order,2)
+top2
+
+
+#visualizing the trend
+beer_trend=ma(ts_beer, order = 4, centre = T)
+plot(ts_beer, col="blue",main="Quaterly sales in Aussie")
+lines(beer_trend, col="green")
+plot(beer_trend, col="green", main="Trend line in Time series")
+
+
+#Detrending time series
+detrend_beer=ts_beer-beer_trend
+plot(detrend_beer, col="blue", main="time series after removing trend component")
+
+
+#Average seasonality
+m_beer=t(matrix(data=detrend_beer, nrow=4))
+m_beer
+
+
+#seasonal variation
+seasonal_beer=colMeans(m_beer, na.rm=T)
+seasonal_beer
+
+seasonal=rep(seasonal_beer,18)
+plot.ts(seasonal,col="blue", main="seasonal compnent of time series")
+
+
+random=detrend_beer-seasonal
+plot(random,col="red",main="random noise")
+
+
+reconstruct = beer_trend+seasonal+random
+plot(reconstruct,col="pink",main="reconstructed series")
+
