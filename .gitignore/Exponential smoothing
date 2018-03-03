@@ -1,0 +1,61 @@
+library(forecast)
+library(TSA)
+library(tseries)
+
+
+setwd("D:/Time series")
+Drinks=read.csv("drinks.csv",1)
+attach(Drinks)
+sales=ts(Sales,frequency = 4)
+plot(sales,col="blue",main = "Drinks Sale")
+
+# Drinks sale: Original+forecast
+fit=hw(sales,seasonal ="multiplicative")
+lines(fitted(fit),col="red")
+fitted(fit)
+
+#forecast
+forecast(fit,8)
+plot(forecast(fit,8))
+
+
+#Drinks Sales : Decomposed
+states=fit$model$states[,1:3]
+colnames(states)=cbind("level","trend",'seasonality')
+plot(states,col="blue",main="Decomposing the forecast")
+
+#Mobike Sale: Time series
+data=read.csv("mb.csv",1)
+attach(data)
+sales=ts(Sales, frequency = 4)
+plot(sales, col="pink",main="Mobike Sales")
+
+#Holt Winter's method: Additive
+fit=hw(Sales,seasonality="additive")
+lines(fitted(fit),col="red")
+fitted(fit)
+forecast(fit,8)
+plot(forecast(fit,8))
+
+#ARIMA
+#Visualize time series
+passenger=read.csv("Airline.csv",1)
+attach(passenger)
+passenger=ts(Airline.Passenger, frequency = 12, start=c(1949))
+plot(passenger,col="blue",main="Time series airline passenger")
+nsdiffs(passenger)
+ndiffs(passenger)
+kpss.test(diff(log(passenger)))
+acf(diff(log(passenger)))
+pacf(diff(log(passenger)))
+fit=arima(log(passenger),c(0,1,1),seasonal = list(order=c(0,1,1),period=12))
+acf(residuals(fit))
+pacf(residuals(fit))
+fit
+
+Box.test(residuals(fit),lag=12,type="Ljung")
+
+#Forecasting
+pred<-predict(fit,n.ahead = 10*12)
+ts.plot(passenger,2.718^pred$pred,log="y",lty=c(1,3),ylabel="Passenger",main="Forecasted series")
+
