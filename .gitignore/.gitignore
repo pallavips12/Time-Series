@@ -1,0 +1,49 @@
+setwd("D:/Time series")
+TSA1=read.csv("tsa1.csv",1)
+attach(TSA1)
+timeseries=ts(TSA1, frequency = 12, start=c(2012,1))
+plot.ts(timeseries,col="blue",main="Sales data time series with time stamp")
+
+passenger=read.csv("airline.csv",1)
+attach(passenger)
+passenger=ts(Airline.Passenger,start = c(1949,1),end = c(1960,12),frequency = 12)
+plot(passenger,main = "Time series of airline passengers between 1949 and 1960", col ="pink")
+abline(reg=lm(passenger~time(passenger)), col="red")
+
+#aggregate of passenger
+Annual_Passenger=aggregate(passenger)
+Annual_Passenger
+plot(Annual_Passenger,col="green",main="Year on year increase in passenger")
+
+#Average increase in passenger year on year
+Average_Passenger=aggregate(passenger, FUN = mean)
+Average_Passenger
+plot(Average_Passenger, col="brown", main = "Average increase in passenger year on year")
+
+#boxplot
+boxplot(passenger~cycle(passenger),main="variation between months and between years")
+
+#Time series data contains white Noise
+#kpss
+#klevel - compares data if data is on left or right
+
+stationary=read.csv("airline.csv",1)
+attach(stationary)
+passenger=ts(Airline.Passenger,frequency = 12)
+kpss.test(passenger)
+# if p-value is less than 0.05, hence data is not stationary
+
+
+#generating stationary timeseries
+nsdiffs(passenger)
+passenger=diff(passenger,lag = frequency(passenger),differences = 1)
+plot(passenger,col="blue",main="After stationary differencing")
+abline(reg = lm(passenger~time(passenger)),col="red")
+kpss.test(passenger)
+
+
+#identifying trend diffference
+ndiffs(passenger)
+passenger=diff(passenger,differences = 1)
+plot(passenger,col="green",main="Identifying trend lines")
+
